@@ -47,8 +47,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 
-    # Local apps (będą dodane w kolejnych commitach)
-    # 'accounts',
+    # Local apps
+    'accounts',
     # 'contacts',
     # 'interactions',
     # 'tasks',
