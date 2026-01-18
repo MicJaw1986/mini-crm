@@ -145,15 +145,15 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary" disabled>
+                    <a href="{% url 'interactions:interaction_create' %}?contact={{ contact.pk }}" class="btn btn-outline-info">
                         <i class="bi bi-chat-dots"></i> Dodaj interakcję
-                    </button>
+                    </a>
                     <button class="btn btn-outline-warning" disabled>
                         <i class="bi bi-plus-circle"></i> Dodaj zadanie
                     </button>
                 </div>
                 <small class="text-muted d-block mt-2">
-                    Funkcje dostępne w kolejnych wersjach
+                    Zadania dostępne w kolejnych wersjach
                 </small>
             </div>
         </div>

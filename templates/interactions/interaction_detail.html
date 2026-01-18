@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ interaction.subject }} - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'interactions:interaction_list' %}">Interakcje</a></li>
+                <li class="breadcrumb-item active">{{ interaction.subject }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group">
+            <a href="{% url 'interactions:interaction_update' interaction.pk %}" class="btn btn-info text-white">
+                <i class="bi bi-pencil"></i> Edytuj
+            </a>
+            <a href="{% url 'interactions:interaction_delete' interaction.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Usuń
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-chat-square-text"></i> {{ interaction.subject }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Typ</h6>
+                        <p><i class="bi bi-tag"></i> {{ interaction.get_interaction_type_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Data</h6>
+                        <p><i class="bi bi-calendar3"></i> {{ interaction.interaction_date|date:"d.m.Y H:i" }}</p>
+                    </div>
+                </div>
+
+                {% if interaction.duration_minutes %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Czas trwania</h6>
+                        <p><i class="bi bi-clock"></i> {{ interaction.duration_minutes }} minut</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Opis</h6>
+                        <p>{{ interaction.description|linebreaks }}</p>
+                    </div>
+                </div>
+
+                {% if interaction.attachments %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Załączniki</h6>
+                        <a href="{{ interaction.attachments.url }}" class="btn btn-sm btn-outline-secondary" download>
+                            <i class="bi bi-paperclip"></i> Pobierz załącznik
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Powiązane z</h6>
+                        <p>
+                            {% if interaction.contact %}
+                            <a href="{% url 'contacts:contact_detail' interaction.contact.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-person"></i> {{ interaction.contact.get_full_name }}
+                            </a>
+                            {% endif %}
+                            {% if interaction.company %}
+                            <a href="{% url 'contacts:company_detail' interaction.company.pk %}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-building"></i> {{ interaction.company.name }}
+                            </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informacje</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Utworzono:</strong><br>
+                    {{ interaction.created_at|date:"d.m.Y H:i" }}
+                </p>
+                <p class="mb-2">
+                    <strong>Zaktualizowano:</strong><br>
+                    {{ interaction.updated_at|date:"d.m.Y H:i" }}
+                </p>
+                {% if interaction.is_important %}
+                <p class="mb-0">
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-star-fill"></i> Ważne
+                    </span>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

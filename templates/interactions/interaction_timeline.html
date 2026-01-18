@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Timeline - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5">
+            <i class="bi bi-clock-history"></i> Timeline Interakcji
+        </h1>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'interactions:interaction_list' %}" class="btn btn-secondary me-2">
+            <i class="bi bi-list"></i> Lista
+        </a>
+        <a href="{% url 'interactions:interaction_create' %}" class="btn btn-info text-white">
+            <i class="bi bi-plus-circle"></i> Dodaj interakcję
+        </a>
+    </div>
+</div>
+
+<div class="mb-3">
+    <p class="text-muted">
+        Wszystkie interakcje: <strong>{{ total_count }}</strong>
+    </p>
+</div>
+
+{% if interactions %}
+<div class="timeline">
+    {% for interaction in interactions %}
+    <div class="timeline-item{% if interaction.is_important %} timeline-important{% endif %}">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="card-title">
+                                <a href="{% url 'interactions:interaction_detail' interaction.pk %}">
+                                    {{ interaction.subject }}
+                                </a>
+                            </h5>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-calendar3"></i>
+                                {{ interaction.interaction_date|date:"d.m.Y H:i" }}
+                                •
+                                <i class="bi bi-tag"></i>
+                                {{ interaction.get_interaction_type_display }}
+                                {% if interaction.duration_minutes %}
+                                •
+                                <i class="bi bi-clock"></i>
+                                {{ interaction.duration_minutes }} min
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if interaction.is_important %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-star-fill"></i> Ważne
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <p class="card-text">{{ interaction.description }}</p>
+
+                    <div class="mt-2">
+                        {% if interaction.contact %}
+                        <a href="{% url 'contacts:contact_detail' interaction.contact.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-person"></i> {{ interaction.contact.get_full_name }}
+                        </a>
+                        {% endif %}
+                        {% if interaction.company %}
+                        <a href="{% url 'contacts:company_detail' interaction.company.pk %}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-building"></i> {{ interaction.company.name }}
+                        </a>
+                        {% endif %}
+                        {% if interaction.attachments %}
+                        <a href="{{ interaction.attachments.url }}" class="btn btn-sm btn-outline-secondary" download>
+                            <i class="bi bi-paperclip"></i> Załącznik
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        Dodano: {{ interaction.created_at|date:"d.m.Y H:i" }}
+                        {% if interaction.updated_at != interaction.created_at %}
+                        • Zaktualizowano: {{ interaction.updated_at|date:"d.m.Y H:i" }}
+                        {% endif %}
+                    </small>
+                    <div class="float-end">
+                        <a href="{% url 'interactions:interaction_update' interaction.pk %}" class="btn btn-sm btn-link">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'interactions:interaction_delete' interaction.pk %}" class="btn btn-sm btn-link text-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    Brak interakcji do wyświetlenia.
+    <a href="{% url 'interactions:interaction_create' %}" class="alert-link">Dodaj pierwszą interakcję</a>
+</div>
+{% endif %}
+{% endblock %}

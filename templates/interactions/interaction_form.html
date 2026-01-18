@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} interakcję - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'interactions:interaction_list' %}">Interakcje</a></li>
+                {% if interaction %}
+                <li class="breadcrumb-item"><a href="{% url 'interactions:interaction_detail' interaction.pk %}">{{ interaction.subject }}</a></li>
+                <li class="breadcrumb-item active">Edytuj</li>
+                {% else %}
+                <li class="breadcrumb-item active">Nowa interakcja</li>
+                {% endif %}
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-{% if interaction %}chat-square-text{% else %}plus-circle{% endif %}"></i>
+                    {{ action }} interakcję
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Powiązania</legend>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.contact|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.company|as_crispy_field }}
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            Wybierz kontakt lub firmę (lub oba, jeśli kontakt należy do firmy)
+                        </small>
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Dane interakcji</legend>
+                        {{ form.interaction_type|as_crispy_field }}
+                        {{ form.subject|as_crispy_field }}
+                        {{ form.description|as_crispy_field }}
+                        <div class="row">
+                            <div class="col-md-8">
+                                {{ form.interaction_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.duration_minutes|as_crispy_field }}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Dodatkowe opcje</legend>
+                        {{ form.attachments|as_crispy_field }}
+                        <div class="form-check">
+                            {{ form.is_important }}
+                            <label class="form-check-label" for="{{ form.is_important.id_for_label }}">
+                                Oznacz jako ważne
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="bi bi-save"></i> Zapisz
+                        </button>
+                        <a href="{% if interaction %}{% url 'interactions:interaction_detail' interaction.pk %}{% else %}{% url 'interactions:interaction_list' %}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

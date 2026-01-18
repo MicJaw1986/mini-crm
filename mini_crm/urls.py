@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('contacts/', include('contacts.urls')),
+    path('interactions/', include('interactions.urls')),
     path('dashboard/', login_required(TemplateView.as_view(template_name='dashboard.html')), name='dashboard'),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='home'),
 ]

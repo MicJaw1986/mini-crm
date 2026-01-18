@@ -158,6 +158,9 @@
                     <a href="{% url 'contacts:contact_create' %}?company={{ company.pk }}" class="btn btn-outline-primary">
                         <i class="bi bi-person-plus"></i> Dodaj kontakt
                     </a>
+                    <a href="{% url 'interactions:interaction_create' %}?company={{ company.pk }}" class="btn btn-outline-info">
+                        <i class="bi bi-chat-dots"></i> Dodaj interakcję
+                    </a>
                 </div>
             </div>
         </div>
