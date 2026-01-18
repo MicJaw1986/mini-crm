@@ -18,8 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView, TemplateView
-from django.contrib.auth.decorators import login_required
+from django.views.generic import RedirectView
+from accounts.dashboard_views import dashboard_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,7 +27,7 @@ urlpatterns = [
     path('contacts/', include('contacts.urls')),
     path('interactions/', include('interactions.urls')),
     path('tasks/', include('tasks.urls')),
-    path('dashboard/', login_required(TemplateView.as_view(template_name='dashboard.html')), name='dashboard'),
+    path('dashboard/', dashboard_view, name='dashboard'),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='home'),
 ]
 

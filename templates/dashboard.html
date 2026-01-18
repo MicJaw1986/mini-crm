@@ -3,6 +3,14 @@
 
 {% block title %}Dashboard - Mini CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+.stat-card { transition: transform 0.2s; }
+.stat-card:hover { transform: translateY(-5px); }
+.chart-container { position: relative; height: 300px; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="row mb-4">
@@ -14,66 +22,122 @@
         </div>
     </div>
 
+    <!-- Statystyki -->
     <div class="row">
         <div class="col-md-3 mb-4">
-            <div class="card dashboard-card bg-primary text-white">
+            <a href="{% url 'contacts:contact_list' %}" class="text-decoration-none">
+                <div class="card stat-card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Kontakty</h6>
+                                <h2 class="mb-0">{{ total_contacts }}</h2>
+                            </div>
+                            <div>
+                                <i class="bi bi-people" style="font-size: 3rem; opacity: 0.5;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <a href="{% url 'contacts:company_list' %}" class="text-decoration-none">
+                <div class="card stat-card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Firmy</h6>
+                                <h2 class="mb-0">{{ total_companies }}</h2>
+                                <small>{{ companies_with_contacts }} z kontaktami</small>
+                            </div>
+                            <div>
+                                <i class="bi bi-building" style="font-size: 3rem; opacity: 0.5;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <a href="{% url 'tasks:task_list' %}" class="text-decoration-none">
+                <div class="card stat-card bg-warning text-dark h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Zadania</h6>
+                                <h2 class="mb-0">{{ total_tasks }}</h2>
+                                {% if overdue_count > 0 %}
+                                <small class="text-danger"><strong>{{ overdue_count }} po terminie!</strong></small>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <i class="bi bi-list-check" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <a href="{% url 'interactions:interaction_list' %}" class="text-decoration-none">
+                <div class="card stat-card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Interakcje</h6>
+                                <h2 class="mb-0">{{ total_interactions }}</h2>
+                                <small>{{ interactions_this_month }} w tym miesiącu</small>
+                            </div>
+                            <div>
+                                <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.5;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Wykresy -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Statusy kontaktów</h5>
+                </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1">Kontakty</h6>
-                            <h2 class="mb-0">0</h2>
-                        </div>
-                        <div>
-                            <i class="bi bi-people" style="font-size: 3rem; opacity: 0.5;"></i>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="contactStatusChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-4">
-            <div class="card dashboard-card bg-success text-white">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Typy interakcji</h5>
+                </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1">Firmy</h6>
-                            <h2 class="mb-0">0</h2>
-                        </div>
-                        <div>
-                            <i class="bi bi-building" style="font-size: 3rem; opacity: 0.5;"></i>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="interactionTypeChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-4">
-            <div class="card dashboard-card bg-warning text-dark">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1">Zadania</h6>
-                            <h2 class="mb-0">0</h2>
-                        </div>
-                        <div>
-                            <i class="bi bi-list-check" style="font-size: 3rem; opacity: 0.3;"></i>
-                        </div>
-                    </div>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Statusy zadań</h5>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-4">
-            <div class="card dashboard-card bg-info text-white">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1">Interakcje</h6>
-                            <h2 class="mb-0">0</h2>
-                        </div>
-                        <div>
-                            <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.5;"></i>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="taskStatusChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -81,6 +145,7 @@
     </div>
 
     <div class="row">
+        <!-- Ostatnie aktywności -->
         <div class="col-md-8 mb-4">
             <div class="card">
                 <div class="card-header">
@@ -89,30 +154,89 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    {% if recent_interactions or recent_tasks %}
+                    <div class="list-group list-group-flush">
+                        {% for interaction in recent_interactions %}
+                        <a href="{% url 'interactions:interaction_detail' interaction.pk %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1"><i class="bi bi-chat-dots text-info"></i> {{ interaction.subject }}</h6>
+                                <small>{{ interaction.interaction_date|timesince }} temu</small>
+                            </div>
+                            <p class="mb-1">
+                                <small class="text-muted">
+                                    {{ interaction.get_interaction_type_display }}
+                                    {% if interaction.contact %}• {{ interaction.contact.get_full_name }}{% endif %}
+                                </small>
+                            </p>
+                        </a>
+                        {% endfor %}
+                        {% for task in recent_tasks %}
+                        <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1"><i class="bi bi-list-check text-warning"></i> {{ task.title }}</h6>
+                                <small>{{ task.created_at|timesince }} temu</small>
+                            </div>
+                            <p class="mb-1">
+                                <small class="text-muted">
+                                    <span class="badge task-status-{{ task.status }}">{{ task.get_status_display }}</span>
+                                    <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priority_display }}</span>
+                                </small>
+                            </p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
                     <div class="alert alert-info mb-0">
                         <i class="bi bi-info-circle"></i>
-                        Brak aktywności do wyświetlenia. Rozpocznij pracę, dodając kontakty lub zadania.
+                        Brak aktywności. Rozpocznij pracę, dodając kontakty lub zadania.
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-header bg-warning">
+            <!-- Pilne zadania -->
+            <div class="card mb-3">
+                <div class="card-header bg-danger text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-exclamation-triangle"></i> Pilne zadania
+                        <i class="bi bi-exclamation-triangle"></i> Zadania pilne
                     </h5>
                 </div>
                 <div class="card-body">
+                    {% if overdue_tasks or urgent_tasks or due_soon_tasks %}
+                    <div class="list-group list-group-flush">
+                        {% for task in overdue_tasks %}
+                        <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action list-group-item-danger">
+                            <strong>{{ task.title }}</strong><br>
+                            <small>Po terminie: {{ task.due_date|date:"d.m.Y" }}</small>
+                        </a>
+                        {% endfor %}
+                        {% for task in urgent_tasks %}
+                        <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action list-group-item-warning">
+                            <strong>{{ task.title }}</strong><br>
+                            <small>Pilne{% if task.due_date %}: {{ task.due_date|date:"d.m.Y" }}{% endif %}</small>
+                        </a>
+                        {% endfor %}
+                        {% for task in due_soon_tasks %}
+                        <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action">
+                            <strong>{{ task.title }}</strong><br>
+                            <small>Wkrótce: {{ task.due_date|date:"d.m.Y H:i" }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
                     <p class="text-muted mb-0">
                         <i class="bi bi-check-circle"></i>
                         Brak pilnych zadań
                     </p>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="card mt-3">
+            <!-- Szybkie akcje -->
+            <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
                         <i class="bi bi-lightning"></i> Szybkie akcje
@@ -126,16 +250,91 @@
                         <a href="{% url 'contacts:company_create' %}" class="btn btn-outline-success">
                             <i class="bi bi-building-add"></i> Dodaj firmę
                         </a>
-                        <button class="btn btn-outline-warning" disabled>
+                        <a href="{% url 'tasks:task_create' %}" class="btn btn-outline-warning">
                             <i class="bi bi-plus-circle"></i> Nowe zadanie
-                        </button>
+                        </a>
+                        <a href="{% url 'interactions:interaction_create' %}" class="btn btn-outline-info">
+                            <i class="bi bi-chat-dots"></i> Dodaj interakcję
+                        </a>
                     </div>
-                    <small class="text-muted d-block mt-2">
-                        Zadania będą dostępne w kolejnych wersjach
-                    </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Wykres statusów kontaktów
+{% if contact_status_labels %}
+const contactStatusCtx = document.getElementById('contactStatusChart').getContext('2d');
+new Chart(contactStatusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ contact_status_labels|safe }},
+        datasets: [{
+            data: {{ contact_status_values|safe }},
+            backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#dc3545']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+{% endif %}
+
+// Wykres typów interakcji
+{% if interaction_type_labels %}
+const interactionTypeCtx = document.getElementById('interactionTypeChart').getContext('2d');
+new Chart(interactionTypeCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ interaction_type_labels|safe }},
+        datasets: [{
+            label: 'Liczba interakcji',
+            data: {{ interaction_type_values|safe }},
+            backgroundColor: '#17a2b8'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+{% endif %}
+
+// Wykres statusów zadań
+{% if task_status_labels %}
+const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
+new Chart(taskStatusCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ task_status_labels|safe }},
+        datasets: [{
+            data: {{ task_status_values|safe }},
+            backgroundColor: {{ task_status_colors|safe }}
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+{% endif %}
+</script>
 {% endblock %}
