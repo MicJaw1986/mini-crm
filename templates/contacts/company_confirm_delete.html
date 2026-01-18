@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Usuń firmę - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'contacts:company_list' %}">Firmy</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'contacts:company_detail' company.pk %}">{{ company.name }}</a></li>
+                <li class="breadcrumb-item active">Usuń</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Potwierdź usunięcie
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Czy na pewno chcesz usunąć firmę <strong>{{ company.name }}</strong>?
+                </p>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Uwaga:</strong> Ta operacja jest nieodwracalna.
+                    {% if company.contacts.count > 0 %}
+                    <br><br>
+                    Firma ma <strong>{{ company.contacts.count }}</strong> powiązanych kontaktów.
+                    Powiązanie z kontaktami zostanie usunięte, ale same kontakty pozostaną w systemie.
+                    {% endif %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Tak, usuń firmę
+                        </button>
+                        <a href="{% url 'contacts:company_detail' company.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

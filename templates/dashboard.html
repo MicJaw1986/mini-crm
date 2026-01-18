@@ -120,18 +120,18 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary" disabled>
+                        <a href="{% url 'contacts:contact_create' %}" class="btn btn-outline-primary">
                             <i class="bi bi-person-plus"></i> Dodaj kontakt
-                        </button>
-                        <button class="btn btn-outline-success" disabled>
+                        </a>
+                        <a href="{% url 'contacts:company_create' %}" class="btn btn-outline-success">
                             <i class="bi bi-building-add"></i> Dodaj firmę
-                        </button>
+                        </a>
                         <button class="btn btn-outline-warning" disabled>
                             <i class="bi bi-plus-circle"></i> Nowe zadanie
                         </button>
                     </div>
                     <small class="text-muted d-block mt-2">
-                        Funkcje będą dostępne w kolejnych wersjach
+                        Zadania będą dostępne w kolejnych wersjach
                     </small>
                 </div>
             </div>

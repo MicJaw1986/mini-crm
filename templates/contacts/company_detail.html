@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ company.name }} - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'contacts:company_list' %}">Firmy</a></li>
+                <li class="breadcrumb-item active">{{ company.name }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group">
+            <a href="{% url 'contacts:company_update' company.pk %}" class="btn btn-success">
+                <i class="bi bi-pencil"></i> Edytuj
+            </a>
+            <a href="{% url 'contacts:company_delete' company.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Usuń
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Info -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-building"></i> {{ company.name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    {% if company.nip %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">NIP</h6>
+                        <p>{{ company.nip }}</p>
+                    </div>
+                    {% endif %}
+                    {% if company.industry %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Branża</h6>
+                        <p>{{ company.industry }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="row mb-3">
+                    {% if company.email %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Email</h6>
+                        <p><a href="mailto:{{ company.email }}">{{ company.email }}</a></p>
+                    </div>
+                    {% endif %}
+                    {% if company.phone %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Telefon</h6>
+                        <p><a href="tel:{{ company.phone }}">{{ company.phone }}</a></p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if company.website %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Strona WWW</h6>
+                        <p><a href="{{ company.website }}" target="_blank">{{ company.website }}</a></p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if company.get_full_address %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Adres</h6>
+                        <p>{{ company.get_full_address }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if company.notes %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Notatki</h6>
+                        <p>{{ company.notes|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contacts List -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people"></i> Kontakty w firmie ({{ contacts.count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if contacts %}
+                <div class="list-group">
+                    {% for contact in contacts %}
+                    <a href="{% url 'contacts:contact_detail' contact.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ contact.get_full_name }}</h6>
+                            <span class="badge status-{{ contact.status }}">{{ contact.get_status_display }}</span>
+                        </div>
+                        <p class="mb-1">
+                            <small class="text-muted">
+                                {% if contact.position %}{{ contact.position }} • {% endif %}
+                                {{ contact.email }}
+                            </small>
+                        </p>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">
+                    <i class="bi bi-info-circle"></i>
+                    Brak kontaktów w tej firmie.
+                    <a href="{% url 'contacts:contact_create' %}?company={{ company.pk }}">Dodaj kontakt</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informacje</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Data utworzenia:</strong><br>
+                    {{ company.created_at|date:"d.m.Y H:i" }}
+                </p>
+                <p class="mb-0">
+                    <strong>Ostatnia aktualizacja:</strong><br>
+                    {{ company.updated_at|date:"d.m.Y H:i" }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-list-check"></i> Akcje</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'contacts:contact_create' %}?company={{ company.pk }}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-plus"></i> Dodaj kontakt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

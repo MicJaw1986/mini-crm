@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} kontakt - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'contacts:contact_list' %}">Kontakty</a></li>
+                {% if contact %}
+                <li class="breadcrumb-item"><a href="{% url 'contacts:contact_detail' contact.pk %}">{{ contact.get_full_name }}</a></li>
+                <li class="breadcrumb-item active">Edytuj</li>
+                {% else %}
+                <li class="breadcrumb-item active">Nowy kontakt</li>
+                {% endif %}
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-{% if contact %}fill{% else %}plus{% endif %}"></i>
+                    {{ action }} kontakt
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Dane osobowe</legend>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+                        {{ form.email|as_crispy_field }}
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Kontakt</legend>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.phone|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.mobile|as_crispy_field }}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Powiązania</legend>
+                        {{ form.company|as_crispy_field }}
+                        {{ form.position|as_crispy_field }}
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Status i kategorie</legend>
+                        {{ form.status|as_crispy_field }}
+                        {{ form.tags|as_crispy_field }}
+                        {{ form.last_contact_date|as_crispy_field }}
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Adres</legend>
+                        {{ form.street|as_crispy_field }}
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.postal_code|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.city|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.country|as_crispy_field }}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4">
+                        <legend class="h5">Notatki</legend>
+                        {{ form.notes|as_crispy_field }}
+                    </fieldset>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Zapisz
+                        </button>
+                        <a href="{% if contact %}{% url 'contacts:contact_detail' contact.pk %}{% else %}{% url 'contacts:contact_list' %}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

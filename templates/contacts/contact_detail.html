@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ contact.get_full_name }} - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'contacts:contact_list' %}">Kontakty</a></li>
+                <li class="breadcrumb-item active">{{ contact.get_full_name }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group">
+            <a href="{% url 'contacts:contact_update' contact.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Edytuj
+            </a>
+            <a href="{% url 'contacts:contact_delete' contact.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Usuń
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Info -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-circle"></i> {{ contact.get_full_name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Email</h6>
+                        <p><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Status</h6>
+                        <p><span class="badge status-{{ contact.status }}">{{ contact.get_status_display }}</span></p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    {% if contact.phone %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Telefon</h6>
+                        <p><a href="tel:{{ contact.phone }}">{{ contact.phone }}</a></p>
+                    </div>
+                    {% endif %}
+                    {% if contact.mobile %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Telefon komórkowy</h6>
+                        <p><a href="tel:{{ contact.mobile }}">{{ contact.mobile }}</a></p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if contact.company %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Firma</h6>
+                        <p>
+                            <a href="{% url 'contacts:company_detail' contact.company.pk %}">
+                                {{ contact.company.name }}
+                            </a>
+                        </p>
+                    </div>
+                    {% if contact.position %}
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Stanowisko</h6>
+                        <p>{{ contact.position }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if contact.get_full_address %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Adres</h6>
+                        <p>{{ contact.get_full_address }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if contact.tags %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Tagi</h6>
+                        <p>
+                            {% for tag in contact.get_tags_list %}
+                            <span class="badge bg-secondary">{{ tag }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if contact.notes %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6 class="text-muted">Notatki</h6>
+                        <p>{{ contact.notes|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informacje</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Data utworzenia:</strong><br>
+                    {{ contact.created_at|date:"d.m.Y H:i" }}
+                </p>
+                <p class="mb-2">
+                    <strong>Ostatnia aktualizacja:</strong><br>
+                    {{ contact.updated_at|date:"d.m.Y H:i" }}
+                </p>
+                {% if contact.last_contact_date %}
+                <p class="mb-0">
+                    <strong>Ostatni kontakt:</strong><br>
+                    {{ contact.last_contact_date|date:"d.m.Y" }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-list-check"></i> Akcje</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" disabled>
+                        <i class="bi bi-chat-dots"></i> Dodaj interakcję
+                    </button>
+                    <button class="btn btn-outline-warning" disabled>
+                        <i class="bi bi-plus-circle"></i> Dodaj zadanie
+                    </button>
+                </div>
+                <small class="text-muted d-block mt-2">
+                    Funkcje dostępne w kolejnych wersjach
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kontakty - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5">
+            <i class="bi bi-people"></i> Kontakty
+        </h1>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'contacts:contact_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Dodaj kontakt
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                {{ search_form.query }}
+            </div>
+            <div class="col-md-3">
+                {{ search_form.status }}
+            </div>
+            <div class="col-md-3">
+                {{ search_form.company }}
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Summary -->
+<div class="mb-3">
+    <p class="text-muted">
+        Znaleziono: <strong>{{ total_count }}</strong> kontakt(ów)
+    </p>
+</div>
+
+<!-- Contacts List -->
+{% if contacts %}
+<div class="row">
+    {% for contact in contacts %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'contacts:contact_detail' contact.pk %}" class="text-decoration-none">
+                        {{ contact.get_full_name }}
+                    </a>
+                </h5>
+
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="bi bi-envelope"></i> {{ contact.email }}<br>
+                        {% if contact.phone %}
+                        <i class="bi bi-telephone"></i> {{ contact.phone }}<br>
+                        {% endif %}
+                        {% if contact.company %}
+                        <i class="bi bi-building"></i>
+                        <a href="{% url 'contacts:company_detail' contact.company.pk %}">
+                            {{ contact.company.name }}
+                        </a><br>
+                        {% endif %}
+                        {% if contact.position %}
+                        <i class="bi bi-briefcase"></i> {{ contact.position }}<br>
+                        {% endif %}
+                    </small>
+                </p>
+
+                <span class="badge status-{{ contact.status }}">
+                    {{ contact.get_status_display }}
+                </span>
+
+                {% if contact.tags %}
+                <div class="mt-2">
+                    {% for tag in contact.get_tags_list %}
+                    <span class="badge bg-secondary">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="btn-group btn-group-sm w-100">
+                    <a href="{% url 'contacts:contact_detail' contact.pk %}" class="btn btn-outline-primary">
+                        <i class="bi bi-eye"></i> Szczegóły
+                    </a>
+                    <a href="{% url 'contacts:contact_update' contact.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> Edytuj
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    Nie znaleziono kontaktów.
+    <a href="{% url 'contacts:contact_create' %}" class="alert-link">Dodaj pierwszy kontakt</a>
+</div>
+{% endif %}
+{% endblock %}

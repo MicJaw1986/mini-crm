@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 
     # Local apps
     'accounts',
-    # 'contacts',
+    'contacts',
     # 'interactions',
     # 'tasks',
     # 'ai_assistant',
