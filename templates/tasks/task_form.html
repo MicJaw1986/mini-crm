@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} zadanie - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0">
+                    <i class="bi bi-{% if task %}list-task{% else %}plus-circle{% endif %}"></i>
+                    {{ action }} zadanie
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form.title|as_crispy_field }}
+                    {{ form.description|as_crispy_field }}
+                    <div class="row">
+                        <div class="col-md-6">{{ form.status|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.priority|as_crispy_field }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">{{ form.due_date|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.reminder_date|as_crispy_field }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">{{ form.contact|as_crispy_field }}</div>
+                        <div class="col-md-6">{{ form.company|as_crispy_field }}</div>
+                    </div>
+                    {{ form.assigned_to|as_crispy_field }}
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-save"></i> Zapisz
+                        </button>
+                        <a href="{% if task %}{% url 'tasks:task_detail' task.pk %}{% else %}{% url 'tasks:task_list' %}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Anuluj
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

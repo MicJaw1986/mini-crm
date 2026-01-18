@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.title }} - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col"><h1>{{ task.title }}</h1></div>
+    <div class="col-auto">
+        <a href="{% url 'tasks:task_update' task.pk %}" class="btn btn-warning">Edytuj</a>
+        <a href="{% url 'tasks:task_delete' task.pk %}" class="btn btn-danger">Usuń</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <p><strong>Status:</strong> <span class="badge task-status-{{ task.status }}">{{ task.get_status_display }}</span></p>
+        <p><strong>Priorytet:</strong> <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priority_display }}</span></p>
+        {% if task.description %}<p>{{ task.description|linebreaks }}</p>{% endif %}
+        {% if task.due_date %}<p><strong>Termin:</strong> {{ task.due_date|date:"d.m.Y H:i" }}</p>{% endif %}
+        {% if task.contact %}<p><strong>Kontakt:</strong> <a href="{% url 'contacts:contact_detail' task.contact.pk %}">{{ task.contact.get_full_name }}</a></p>{% endif %}
+        {% if task.company %}<p><strong>Firma:</strong> <a href="{% url 'contacts:company_detail' task.company.pk %}">{{ task.company.name }}</a></p>{% endif %}
+    </div>
+</div>
+{% endblock %}

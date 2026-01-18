@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Moje zadania - Mini CRM{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col"><h1><i class="bi bi-person-check"></i> Moje zadania</h1></div>
+    <div class="col-auto">
+        <a href="{% url 'tasks:task_list' %}" class="btn btn-secondary">Wszystkie zadania</a>
+        <a href="{% url 'tasks:task_create' %}" class="btn btn-warning">Dodaj zadanie</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Przeterminowane ({{ overdue_count }})</h5>
+            </div>
+            <div class="card-body">
+                {% for task in overdue_tasks %}
+                <div class="mb-2">
+                    <a href="{% url 'tasks:task_detail' task.pk %}">{{ task.title }}</a>
+                    <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priority_display }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">Brak przeterminowanych zadań</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-list-task"></i> Do zrobienia ({{ todo_count }})</h5>
+            </div>
+            <div class="card-body">
+                {% for task in todo_tasks %}
+                <div class="mb-2">
+                    <a href="{% url 'tasks:task_detail' task.pk %}">{{ task.title }}</a>
+                    <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priority_display }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">Brak zadań do zrobienia</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="bi bi-hourglass-split"></i> W trakcie ({{ in_progress_count }})</h5>
+            </div>
+            <div class="card-body">
+                {% for task in in_progress_tasks %}
+                <div class="mb-2">
+                    <a href="{% url 'tasks:task_detail' task.pk %}">{{ task.title }}</a>
+                    <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priority_display }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">Brak zadań w trakcie</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

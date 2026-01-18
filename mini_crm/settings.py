@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'accounts',
     'contacts',
     'interactions',
-    # 'tasks',
+    'tasks',
     # 'ai_assistant',
 ]
 

@@ -148,13 +148,10 @@
                     <a href="{% url 'interactions:interaction_create' %}?contact={{ contact.pk }}" class="btn btn-outline-info">
                         <i class="bi bi-chat-dots"></i> Dodaj interakcję
                     </a>
-                    <button class="btn btn-outline-warning" disabled>
+                    <a href="{% url 'tasks:task_create' %}?contact={{ contact.pk }}" class="btn btn-outline-warning">
                         <i class="bi bi-plus-circle"></i> Dodaj zadanie
-                    </button>
+                    </a>
                 </div>
-                <small class="text-muted d-block mt-2">
-                    Zadania dostępne w kolejnych wersjach
-                </small>
             </div>
         </div>
     </div>

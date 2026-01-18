@@ -161,6 +161,9 @@
                     <a href="{% url 'interactions:interaction_create' %}?company={{ company.pk }}" class="btn btn-outline-info">
                         <i class="bi bi-chat-dots"></i> Dodaj interakcję
                     </a>
+                    <a href="{% url 'tasks:task_create' %}?company={{ company.pk }}" class="btn btn-outline-warning">
+                        <i class="bi bi-plus-circle"></i> Dodaj zadanie
+                    </a>
                 </div>
             </div>
         </div>
