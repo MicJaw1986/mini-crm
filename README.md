@@ -133,29 +133,6 @@ pytest tests/e2e/
 
 ## Deployment
 
-### Railway (Zalecane)
-
-1. Załóż konto na [Railway](https://railway.app)
-2. Połącz z repozytorium GitHub
-3. Railway automatycznie wykryje `Procfile` i `runtime.txt`
-4. Ustaw zmienne środowiskowe w panelu Railway:
-   - `SECRET_KEY`
-   - `DATABASE_URL` (automatycznie z PostgreSQL addon)
-   - `ALLOWED_HOSTS`
-5. Deploy!
-
-### Render
-
-1. Załóż konto na [Render](https://render.com)
-2. Utwórz nową Web Service
-3. Połącz z repozytorium
-4. Konfiguracja:
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn mini_crm.wsgi:application`
-5. Dodaj PostgreSQL database
-6. Ustaw zmienne środowiskowe
-7. Deploy!
-
 ## Zmienne Środowiskowe (Produkcja)
 
 ```env
