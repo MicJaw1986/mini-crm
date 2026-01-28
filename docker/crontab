@@ -1,0 +1,23 @@
+# Crontab dla MiniCRM - synchronizacja z ERP
+# Format: minute hour day month weekday command
+#
+# Przykłady:
+# */5 * * * * - co 5 minut
+# 0 * * * *   - co godzinę (na początku godziny)
+# 0 */6 * * * - co 6 godzin
+# 0 2 * * *   - codziennie o 2:00
+# 0 0 * * 0   - co tydzień w niedzielę o północy
+
+# Synchronizacja klientów z ERP - co 6 godzin
+0 */6 * * * cd /app && /usr/local/bin/python manage.py sync_erp_customers >> /var/log/cron.log 2>&1
+
+# Synchronizacja zamówień z ERP - co 2 godziny
+0 */2 * * * cd /app && /usr/local/bin/python manage.py sync_erp_orders >> /var/log/cron.log 2>&1
+
+# Synchronizacja faktur z ERP - co 4 godziny
+0 */4 * * * cd /app && /usr/local/bin/python manage.py sync_erp_invoices >> /var/log/cron.log 2>&1
+
+# Czyszczenie starych cache i sesji - codziennie o 3:00
+0 3 * * * cd /app && /usr/local/bin/python manage.py clearsessions >> /var/log/cron.log 2>&1
+
+# Pusta linia na końcu wymagana przez cron

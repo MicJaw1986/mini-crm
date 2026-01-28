@@ -102,9 +102,105 @@
         </div>
     </div>
 
+    <!-- Sales Pipeline (Opportunities) -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Sales Pipeline (Szanse sprzedaży)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <a href="{% url 'opportunities:opportunity_list' %}" class="text-decoration-none">
+                                <h4 class="text-primary">{{ total_opportunities }}</h4>
+                                <small class="text-muted">Wszystkie</small>
+                            </a>
+                        </div>
+                        <div class="col-md-2">
+                            <h4 class="text-info">{{ open_opportunities }}</h4>
+                            <small class="text-muted">Otwarte</small>
+                        </div>
+                        <div class="col-md-2">
+                            <h4 class="text-success">{{ won_opportunities }}</h4>
+                            <small class="text-muted">Wygrane</small>
+                        </div>
+                        <div class="col-md-2">
+                            <h4 class="text-danger">{{ lost_opportunities }}</h4>
+                            <small class="text-muted">Przegrane</small>
+                        </div>
+                        <div class="col-md-2">
+                            <h4 class="text-warning">{{ pipeline_value|floatformat:0 }} PLN</h4>
+                            <small class="text-muted">Pipeline (ważona)</small>
+                        </div>
+                        <div class="col-md-2">
+                            <h4 class="text-success">{{ revenue|floatformat:0 }} PLN</h4>
+                            <small class="text-muted">Przychód</small>
+                        </div>
+                    </div>
+
+                    <!-- Najbliższe zamknięcia i overdue -->
+                    {% if upcoming_opportunities or overdue_opportunities %}
+                    <hr class="my-3">
+                    <div class="row">
+                        {% if upcoming_opportunities %}
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Najbliższe zamknięcia (7 dni)</h6>
+                            <div class="list-group list-group-flush">
+                                {% for opp in upcoming_opportunities %}
+                                <a href="{% url 'opportunities:opportunity_detail' opp.pk %}" class="list-group-item list-group-item-action py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <small><strong>{{ opp.name }}</strong></small>
+                                        <small class="text-muted">{{ opp.expected_close_date }}</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small>{{ opp.amount|floatformat:0 }} PLN</small>
+                                        <small><span class="badge bg-{{ opp.get_stage_color }}">{{ opp.get_stage_display }}</span></small>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if overdue_opportunities_count > 0 %}
+                        <div class="col-md-6">
+                            <h6 class="text-danger mb-2">Przeterminowane ({{ overdue_opportunities_count }})</h6>
+                            <div class="list-group list-group-flush">
+                                {% for opp in overdue_opportunities %}
+                                <a href="{% url 'opportunities:opportunity_detail' opp.pk %}" class="list-group-item list-group-item-action list-group-item-danger py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <small><strong>{{ opp.name }}</strong></small>
+                                        {% with neg_days=opp.days_until_close %}
+                                        <small>{{ neg_days|add:"0"|floatformat:"0"|cut:"-" }} dni temu</small>
+                                        {% endwith %}
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small>{{ opp.amount|floatformat:0 }} PLN</small>
+                                        <small><span class="badge bg-{{ opp.get_stage_color }}">{{ opp.get_stage_display }}</span></small>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Link do pełnej listy -->
+                    <div class="text-center mt-3">
+                        <a href="{% url 'opportunities:opportunity_list' %}" class="btn btn-outline-primary">
+                            Zobacz wszystkie szanse sprzedażowe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Wykresy -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Statusy kontaktów</h5>
@@ -117,7 +213,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Typy interakcji</h5>
@@ -130,7 +226,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Statusy zadań</h5>
@@ -138,6 +234,19 @@
                 <div class="card-body">
                     <div class="chart-container">
                         <canvas id="taskStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Etapy opportunities</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="opportunityStageChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -332,6 +441,28 @@ new Chart(taskStatusCtx, {
         maintainAspectRatio: false,
         plugins: {
             legend: { position: 'bottom' }
+        }
+    }
+});
+{% endif %}
+
+// Wykres etapów opportunities
+{% if opportunity_stage_labels %}
+const opportunityStageCtx = document.getElementById('opportunityStageChart').getContext('2d');
+new Chart(opportunityStageCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ opportunity_stage_labels|safe }},
+        datasets: [{
+            data: {{ opportunity_stage_values|safe }},
+            backgroundColor: {{ opportunity_stage_colors|safe }}
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 10 } } }
         }
     }
 });

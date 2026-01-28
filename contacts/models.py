@@ -24,6 +24,14 @@ class Company(models.Model):
     postal_code = models.CharField('Kod pocztowy', max_length=10, blank=True)
     country = models.CharField('Kraj', max_length=100, default='Polska')
 
+    # Integracja z ERP
+    erp_customer_code = models.CharField(
+        'Kod kontrahenta w ERP',
+        max_length=50,
+        blank=True,
+        help_text='Kod klienta w systemie ERP (np. Comarch XL)'
+    )
+
     # Metadata
     notes = models.TextField('Notatki', blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Właściciel', related_name='companies')

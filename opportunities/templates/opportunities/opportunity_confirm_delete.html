@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuń szansę - {{ opportunity.name }} - MiniCRM{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'opportunities:opportunity_list' %}">Szanse sprzedaży</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'opportunities:opportunity_detail' opportunity.pk %}">
+                    {{ opportunity.name }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Usuń</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Potwierdzenie usunięcia</h5>
+                </div>
+                <div class="card-body">
+                    <p>Czy na pewno chcesz usunąć tę szansę sprzedażową?</p>
+
+                    <div class="alert alert-warning">
+                        <strong>Szansa:</strong> {{ opportunity.name }}<br>
+                        <strong>Wartość:</strong> {{ opportunity.amount|floatformat:2 }} PLN<br>
+                        <strong>Etap:</strong> {{ opportunity.get_stage_display }}<br>
+                        {% if opportunity.contact %}
+                        <strong>Kontakt:</strong> {{ opportunity.contact.get_full_name }}<br>
+                        {% endif %}
+                        {% if opportunity.company %}
+                        <strong>Firma:</strong> {{ opportunity.company.name }}<br>
+                        {% endif %}
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <strong>Uwaga:</strong> Ta operacja jest nieodwracalna!
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-danger">
+                                Tak, usuń szansę
+                            </button>
+                            <a href="{% url 'opportunities:opportunity_detail' opportunity.pk %}"
+                               class="btn btn-secondary">
+                                Anuluj
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -6,6 +6,7 @@ from datetime import timedelta
 from contacts.models import Contact, Company
 from interactions.models import Interaction
 from tasks.models import Task
+from opportunities.models import Opportunity
 
 
 @login_required
@@ -49,6 +50,65 @@ def dashboard_view(request):
     # Ostatnie aktywności (interakcje i zadania razem)
     recent_tasks = Task.objects.filter(owner=user).select_related('contact', 'company').order_by('-created_at')[:3]
 
+    # Statystyki opportunities (szans sprzedażowych)
+    total_opportunities = Opportunity.objects.filter(owner=user).count()
+    open_opportunities = Opportunity.objects.filter(
+        owner=user,
+        stage__in=['qualification', 'proposal', 'negotiation']
+    ).count()
+    won_opportunities = Opportunity.objects.filter(owner=user, stage='closed_won').count()
+    lost_opportunities = Opportunity.objects.filter(owner=user, stage='closed_lost').count()
+
+    # Pipeline value (wartość ważona wszystkich otwartych opportunities)
+    pipeline_value = sum(
+        opp.get_weighted_value()
+        for opp in Opportunity.objects.filter(
+            owner=user,
+            stage__in=['qualification', 'proposal', 'negotiation']
+        )
+    )
+
+    # Wartość wygranych opportunities (przychód)
+    revenue = sum(
+        opp.amount
+        for opp in Opportunity.objects.filter(owner=user, stage='closed_won')
+    )
+
+    # Opportunities przekroczone (overdue)
+    overdue_opportunities = [
+        opp for opp in Opportunity.objects.filter(
+            owner=user,
+            stage__in=['qualification', 'proposal', 'negotiation']
+        ) if opp.is_overdue()
+    ]
+
+    # Najbliższe zamknięcia (następne 7 dni)
+    upcoming_opportunities = Opportunity.objects.filter(
+        owner=user,
+        stage__in=['qualification', 'proposal', 'negotiation'],
+        expected_close_date__gte=now.date(),
+        expected_close_date__lte=now.date() + timedelta(days=7)
+    ).select_related('contact', 'company').order_by('expected_close_date')[:5]
+
+    # Statystyki według stage
+    opportunities_by_stage = Opportunity.objects.filter(owner=user).values('stage').annotate(count=Count('id'))
+    opportunity_stage_data = {item['stage']: item['count'] for item in opportunities_by_stage}
+    opportunity_stage_labels = []
+    opportunity_stage_values = []
+    opportunity_stage_colors = []
+    stage_color_map = {
+        'qualification': '#6c757d',    # gray
+        'proposal': '#0dcaf0',         # cyan
+        'negotiation': '#ffc107',      # yellow
+        'closed_won': '#198754',       # green
+        'closed_lost': '#dc3545'       # red
+    }
+    for stage_code, stage_name in Opportunity.STAGE_CHOICES:
+        if stage_code in opportunity_stage_data:
+            opportunity_stage_labels.append(stage_name)
+            opportunity_stage_values.append(opportunity_stage_data[stage_code])
+            opportunity_stage_colors.append(stage_color_map.get(stage_code, '#6c757d'))
+
     # Dane do wykresów
     # Statusy kontaktów
     contact_status_data = {item['status']: item['count'] for item in contacts_by_status}
@@ -91,8 +151,16 @@ def dashboard_view(request):
         'total_companies': total_companies,
         'total_interactions': total_interactions,
         'total_tasks': total_tasks,
+        'total_opportunities': total_opportunities,
         'companies_with_contacts': companies_with_contacts,
         'interactions_this_month': interactions_this_month,
+
+        # Statystyki opportunities
+        'open_opportunities': open_opportunities,
+        'won_opportunities': won_opportunities,
+        'lost_opportunities': lost_opportunities,
+        'pipeline_value': pipeline_value,
+        'revenue': revenue,
 
         # Dane do wykresów
         'contact_status_labels': contact_status_labels,
@@ -102,6 +170,9 @@ def dashboard_view(request):
         'task_status_labels': task_status_labels,
         'task_status_values': task_status_values,
         'task_status_colors': task_status_colors,
+        'opportunity_stage_labels': opportunity_stage_labels,
+        'opportunity_stage_values': opportunity_stage_values,
+        'opportunity_stage_colors': opportunity_stage_colors,
 
         # Listy dla widżetów
         'recent_interactions': recent_interactions,
@@ -109,11 +180,14 @@ def dashboard_view(request):
         'overdue_tasks': overdue_tasks[:5],
         'urgent_tasks': urgent_tasks,
         'due_soon_tasks': due_soon_tasks[:5],
+        'overdue_opportunities': overdue_opportunities[:5],
+        'upcoming_opportunities': upcoming_opportunities,
 
         # Liczniki dla widżetów
         'overdue_count': len(overdue_tasks),
         'urgent_count': urgent_tasks.count(),
         'due_soon_count': len(due_soon_tasks),
+        'overdue_opportunities_count': len(overdue_opportunities),
     }
 
     return render(request, 'dashboard.html', context)

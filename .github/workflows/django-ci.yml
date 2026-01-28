@@ -1,0 +1,163 @@
+# Workflow CI/CD dla MiniCRM
+#
+# CZYTAJ KOMENTARZE - Wszystko jest wyjaśnione krok po kroku!
+#
+# Ten plik uruchamia się automatycznie gdy:
+# 1. Ktoś wypycha kod (git push)
+# 2. Ktoś tworzy Pull Request
+
+name: Django CI
+
+# Kiedy uruchomić ten workflow?
+on:
+  push:
+    branches: [ main, develop ]  # Uruchom przy push na main lub develop
+  pull_request:
+    branches: [ main ]           # Uruchom przy PR do main
+
+# Zmienne środowiskowe dla całego workflow
+env:
+  PYTHON_VERSION: '3.12'
+
+# Lista zadań (jobs) do wykonania
+jobs:
+  # Job 1: Testowanie aplikacji
+  test:
+    # Na jakim systemie uruchomić?
+    runs-on: ubuntu-latest
+
+    # Kroki do wykonania
+    steps:
+    # Krok 1: Pobierz kod z repozytorium
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Krok 2: Zainstaluj Python 3.14
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    # Krok 3: Cache pip dependencies (przyspiesza workflow)
+    # Jeśli requirements.txt się nie zmienił, używamy cache
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # Krok 4: Zainstaluj zależności
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage
+
+    # Krok 5: Sprawdź konfigurację Django
+    - name: Check Django configuration
+      run: |
+        python manage.py check
+
+    # Krok 6: Uruchom testy z pomiarem coverage
+    - name: Run tests with coverage
+      run: |
+        coverage run --source='.' manage.py test
+        coverage report
+        coverage html
+
+    # Krok 7: Sprawdź czy coverage jest wystarczające (min 70%)
+    - name: Check coverage threshold
+      run: |
+        coverage report --fail-under=70
+
+    # Krok 8: Zapisz raport coverage jako artifact
+    # Możesz go pobrać z GitHub Actions → Artifacts
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()  # Zawsze uploaduj, nawet jeśli testy nie przeszły
+      with:
+        name: coverage-report
+        path: htmlcov/
+
+    # Krok 9: Sprawdź migracje (czy nie ma konfliktów)
+    - name: Check for migration conflicts
+      run: |
+        python manage.py makemigrations --check --dry-run --no-input
+
+  # Job 2: Sprawdzanie jakości kodu (linting)
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install linting tools
+      run: |
+        pip install flake8
+
+    # Flake8 sprawdza:
+    # - Błędy składni Python
+    # - Niespójności w stylu kodu (PEP 8)
+    # - Potencjalne błędy logiczne
+    - name: Lint with flake8
+      run: |
+        # Zatrzymaj build jeśli są błędy składni lub niezdefiniowane nazwy
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Ostrzeżenia o stylu (nie zatrzymuje buildu)
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  # Job 3: Sprawdzanie bezpieczeństwa
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install security tools
+      run: |
+        pip install safety bandit
+
+    # Safety sprawdza czy używane biblioteki mają znane podatności
+    - name: Check for known vulnerabilities in dependencies
+      run: |
+        pip install -r requirements.txt
+        safety check --json || true  # || true = nie zatrzymuj buildu
+
+    # Bandit skanuje kod Python pod kątem problemów bezpieczeństwa
+    - name: Security scan with Bandit
+      run: |
+        bandit -r . -ll -i  # -ll = tylko high severity, -i = pokaż problemy
+
+# PODSUMOWANIE - Co robi ten workflow?
+#
+# Przy każdym git push:
+# 1. Job "test":
+#    - Instaluje Python i zależności
+#    - Uruchamia wszystkie testy Django
+#    - Mierzy coverage (pokrycie testami)
+#    - Sprawdza czy coverage ≥ 70%
+#    - Zapisuje raport HTML
+#    - Sprawdza migracje
+#
+# 2. Job "lint":
+#    - Sprawdza jakość kodu (flake8)
+#    - Wykrywa błędy składni
+#    - Sprawdza styl kodu PEP 8
+#
+# 3. Job "security":
+#    - Skanuje zależności (safety)
+#    - Skanuje kod (bandit)
+#
+# Jeśli którykolwiek job nie przejdzie - dostaniesz email z GitHub!

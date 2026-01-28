@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ opportunity.name }} - MiniCRM{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'opportunities:opportunity_list' %}">Szanse sprzedaży</a>
+            </li>
+            <li class="breadcrumb-item active">{{ opportunity.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header z akcjami -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ opportunity.name }}</h1>
+        <div>
+            <a href="{% url 'opportunities:opportunity_update' opportunity.pk %}"
+               class="btn btn-primary">
+                Edytuj
+            </a>
+            <a href="{% url 'opportunities:opportunity_delete' opportunity.pk %}"
+               class="btn btn-danger">
+                Usuń
+            </a>
+        </div>
+    </div>
+
+    <!-- Status i stage -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-2">Aktualny etap:</h5>
+                            <span class="badge bg-{{ opportunity.get_stage_color }} fs-5">
+                                {{ opportunity.get_stage_display }}
+                            </span>
+                        </div>
+                        <div>
+                            <h5 class="mb-2">Szybkie przejścia:</h5>
+                            <div class="btn-group" role="group">
+                                {% if opportunity.stage == 'qualification' %}
+                                <a href="{% url 'opportunities:opportunity_move_stage' opportunity.pk 'proposal' %}"
+                                   class="btn btn-sm btn-outline-info">→ Propozycja</a>
+                                {% elif opportunity.stage == 'proposal' %}
+                                <a href="{% url 'opportunities:opportunity_move_stage' opportunity.pk 'negotiation' %}"
+                                   class="btn btn-sm btn-outline-warning">→ Negocjacje</a>
+                                {% elif opportunity.stage == 'negotiation' %}
+                                <a href="{% url 'opportunities:opportunity_move_stage' opportunity.pk 'closed_won' %}"
+                                   class="btn btn-sm btn-outline-success">→ Wygrana</a>
+                                <a href="{% url 'opportunities:opportunity_move_stage' opportunity.pk 'closed_lost' %}"
+                                   class="btn btn-sm btn-outline-danger">→ Przegrana</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kluczowe informacje -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Wartość</h6>
+                    <h3 class="text-primary">{{ opportunity.amount|floatformat:2 }} PLN</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Prawdopodobieństwo</h6>
+                    <h3>
+                        <span class="badge bg-{{ opportunity.get_probability_color }}">
+                            {{ opportunity.probability }}%
+                        </span>
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Wartość ważona</h6>
+                    <h3 class="text-success">{{ weighted_value|floatformat:2 }} PLN</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Do zamknięcia</h6>
+                    <h3>
+                        {% if is_overdue %}
+                        {% with neg_days=days_until_close %}
+                        <span class="text-danger">{{ neg_days|add:"0"|floatformat:"0"|cut:"-" }} dni temu</span>
+                        {% endwith %}
+                        {% elif days_until_close == 0 %}
+                        <span class="text-warning">Dziś!</span>
+                        {% else %}
+                        {{ days_until_close }} dni
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Szczegóły -->
+    <div class="row">
+        <!-- Podstawowe informacje -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Podstawowe informacje</h5>
+                </div>
+                <div class="card-body">
+                    {% if opportunity.description %}
+                    <div class="mb-3">
+                        <strong>Opis:</strong>
+                        <p class="mt-1">{{ opportunity.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-2">
+                        <strong>Właściciel:</strong>
+                        {{ opportunity.owner.get_full_name }}
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Data utworzenia:</strong>
+                        {{ opportunity.created_at|date:"d.m.Y H:i" }}
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Ostatnia aktualizacja:</strong>
+                        {{ opportunity.updated_at|date:"d.m.Y H:i" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relacje i daty -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Relacje i terminy</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Kontakt:</strong>
+                        {% if opportunity.contact %}
+                        <a href="{% url 'contacts:contact_detail' opportunity.contact.pk %}">
+                            {{ opportunity.contact.get_full_name }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">Brak</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Firma:</strong>
+                        {% if opportunity.company %}
+                        <a href="{% url 'contacts:company_detail' opportunity.company.pk %}">
+                            {{ opportunity.company.name }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">Brak</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Przewidywana data zamknięcia:</strong>
+                        {{ opportunity.expected_close_date }}
+                        {% if is_overdue %}
+                        <span class="badge bg-danger">OVERDUE!</span>
+                        {% endif %}
+                    </div>
+
+                    {% if opportunity.actual_close_date %}
+                    <div class="mb-2">
+                        <strong>Rzeczywista data zamknięcia:</strong>
+                        {{ opportunity.actual_close_date }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informacje o przegranej (jeśli dotyczy) -->
+    {% if opportunity.is_lost %}
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Informacje o przegranej</h5>
+                </div>
+                <div class="card-body">
+                    {% if opportunity.lost_reason %}
+                    <div class="mb-2">
+                        <strong>Powód przegranej:</strong>
+                        {{ opportunity.get_lost_reason_display }}
+                    </div>
+                    {% endif %}
+
+                    {% if opportunity.lost_reason_details %}
+                    <div>
+                        <strong>Szczegóły:</strong>
+                        <p class="mt-1">{{ opportunity.lost_reason_details }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Informacje o wygranej (jeśli dotyczy) -->
+    {% if opportunity.is_won %}
+    <div class="alert alert-success">
+        <h5>Gratulacje! Szansa została wygrana!</h5>
+        <p class="mb-0">Wartość: <strong>{{ opportunity.amount|floatformat:2 }} PLN</strong></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

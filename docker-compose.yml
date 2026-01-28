@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Baza danych MySQL (opcjonalna, możesz używać SQLite)
+  db:
+    image: mysql:8.0
+    container_name: minicrm_db
+    environment:
+      MYSQL_DATABASE: minicrm
+      MYSQL_USER: minicrm_user
+      MYSQL_PASSWORD: minicrm_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "minicrm_user", "-pminicrm_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Aplikacja webowa Django z cronem
+  web:
+    build: .
+    container_name: minicrm_web
+    command: web
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mysql://minicrm_user:minicrm_password@db:3306/minicrm
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Opcjonalny: Nginx jako reverse proxy (dla produkcji)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: minicrm_nginx
+  #   volumes:
+  #     - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - static_volume:/app/staticfiles:ro
+  #     - media_volume:/app/media:ro
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   depends_on:
+  #     - web
+  #   restart: unless-stopped
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume:

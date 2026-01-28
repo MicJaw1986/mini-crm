@@ -27,6 +27,7 @@ urlpatterns = [
     path('contacts/', include('contacts.urls')),
     path('interactions/', include('interactions.urls')),
     path('tasks/', include('tasks.urls')),
+    path('opportunities/', include('opportunities.urls')),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='home'),
 ]

@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Szanse sprzedaży - MiniCRM{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header z przyciskiem dodawania -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Szanse sprzedaży</h1>
+        <a href="{% url 'opportunities:opportunity_create' %}" class="btn btn-primary">
+            + Nowa szansa
+        </a>
+    </div>
+
+    <!-- Statystyki pipeline -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ stats.total }}</h3>
+                    <p class="mb-0">Wszystkie</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h3 class="text-info">{{ stats.open }}</h3>
+                    <p class="mb-0">Otwarte</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ stats.won }}</h3>
+                    <p class="mb-0">Wygrane</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h3 class="text-danger">{{ stats.lost }}</h3>
+                    <p class="mb-0">Przegrane</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline Value -->
+    <div class="alert alert-info mb-4">
+        <strong>Wartość pipeline (ważona):</strong> {{ pipeline_value|floatformat:2 }} PLN
+    </div>
+
+    <!-- Wyszukiwanie i filtrowanie -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Szukaj po nazwie, kontakcie, firmie..."
+                           value="{{ search_query }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="stage" class="form-select">
+                        <option value="">Wszystkie etapy</option>
+                        {% for value, label in stage_choices %}
+                        <option value="{{ value }}" {% if stage_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtruj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista opportunities -->
+    {% if opportunities %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Etap</th>
+                    <th>Wartość</th>
+                    <th>Prawdopodobieństwo</th>
+                    <th>Wartość ważona</th>
+                    <th>Data zamknięcia</th>
+                    <th>Kontakt/Firma</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opportunity in opportunities %}
+                <tr>
+                    <td>
+                        <a href="{% url 'opportunities:opportunity_detail' opportunity.pk %}">
+                            {{ opportunity.name }}
+                        </a>
+                        {% if opportunity.is_overdue %}
+                        <span class="badge bg-danger">Overdue!</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-{{ opportunity.get_stage_color }}">
+                            {{ opportunity.get_stage_display }}
+                        </span>
+                    </td>
+                    <td>{{ opportunity.amount|floatformat:2 }} PLN</td>
+                    <td>
+                        <span class="badge bg-{{ opportunity.get_probability_color }}">
+                            {{ opportunity.probability }}%
+                        </span>
+                    </td>
+                    <td>{{ opportunity.get_weighted_value|floatformat:2 }} PLN</td>
+                    <td>
+                        {{ opportunity.expected_close_date }}
+                        {% if opportunity.days_until_close > 0 %}
+                        <small class="text-muted">(za {{ opportunity.days_until_close }} dni)</small>
+                        {% elif opportunity.days_until_close < 0 %}
+                        {% with neg_days=opportunity.days_until_close %}
+                        <small class="text-danger">({{ neg_days|add:"0"|floatformat:"0"|cut:"-" }} dni temu)</small>
+                        {% endwith %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if opportunity.contact %}
+                        <a href="{% url 'contacts:contact_detail' opportunity.contact.pk %}">
+                            {{ opportunity.contact.get_full_name }}
+                        </a>
+                        {% endif %}
+                        {% if opportunity.company %}
+                        <br>
+                        <small>
+                            <a href="{% url 'contacts:company_detail' opportunity.company.pk %}">
+                                {{ opportunity.company.name }}
+                            </a>
+                        </small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'opportunities:opportunity_update' opportunity.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            Edytuj
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">
+            Brak szans sprzedażowych.
+            <a href="{% url 'opportunities:opportunity_create' %}">Dodaj pierwszą szansę</a>
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

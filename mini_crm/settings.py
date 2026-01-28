@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-_xuq&ignxc5!3grqwk%9h&$24q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,192.168.1.244').split(',')
 
 
 # Application definition
@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'contacts',
     'interactions',
     'tasks',
+    'opportunities',
+    'erp_integration',
     # 'ai_assistant',
 ]
 
@@ -148,14 +150,26 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # WhiteNoise configuration for production
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+# W testach używamy prostszego storage, żeby uniknąć problemów z manifestem
+import sys
+if 'test' in sys.argv:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -166,3 +180,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# =============================================================================
+# ERP INTEGRATION SETTINGS
+# =============================================================================
+
+# Comarch ERP XL API Configuration
+# TODO: Wypełnij poniższe wartości lub użyj zmiennych środowiskowych
+COMARCH_API_URL = os.getenv('COMARCH_API_URL', '')
+# Przykład: COMARCH_API_URL = 'https://your-erp-server.com/api'
+
+COMARCH_API_KEY = os.getenv('COMARCH_API_KEY', '')
+# Jeśli używasz Bearer token / API Key
+
+COMARCH_API_USER = os.getenv('COMARCH_API_USER', '')
+COMARCH_API_PASSWORD = os.getenv('COMARCH_API_PASSWORD', '')
+# Jeśli używasz Basic Auth
+
+COMARCH_TIMEOUT = int(os.getenv('COMARCH_TIMEOUT', '30'))
+# Timeout dla requestów HTTP w sekundach
+
+# ERP Integration Mode
+ERP_INTEGRATION_ENABLED = os.getenv('ERP_INTEGRATION_ENABLED', 'False') == 'True'
+# Ustaw na True gdy API jest gotowe do użycia
+
+ERP_CACHE_ENABLED = os.getenv('ERP_CACHE_ENABLED', 'False') == 'True'
+# Czy używać cache (modele ERPOrder, ERPInvoice, etc.)
+# False = zawsze live data z API
+# True = cache z okresową synchronizacją

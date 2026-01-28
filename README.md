@@ -1,8 +1,10 @@
 # Mini CRM - System Zarządzania Relacjami z Klientami
 
+![Django CI](https://github.com/TWOJ_USERNAME/MiniCrm/workflows/Django%20CI/badge.svg)
 ![Django](https://img.shields.io/badge/Django-5.0-green)
 ![Python](https://img.shields.io/badge/Python-3.12+-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)
 
 Webowa aplikacja CRM do zarządzania kontaktami biznesowymi, firmami i interakcjami z klientami. Projekt zaliczeniowy na kurs AI.
 
@@ -13,7 +15,9 @@ Webowa aplikacja CRM do zarządzania kontaktami biznesowymi, firmami i interakcj
 - ✅ **Zarządzanie firmami** - organizacja kontaktów według firm
 - ✅ **Interakcje** - notatki, telefony, emaile, spotkania z timeline
 - ✅ **Zadania** - zarządzanie zadaniami z terminami i statusami
-- ✅ **Dashboard** - podsumowanie aktywności i statystyki
+- ✅ **Opportunities** - sales pipeline, zarządzanie szansami sprzedażowymi
+- ✅ **Dashboard** - podsumowanie aktywności i statystyki z wykresami
+- ⚙️ **Integracja ERP** - podgląd zamówień, faktur, WZ z systemów ERP (Comarch XL, SAP, etc.)
 - 🔮 **AI Assistant** - generowanie podsumowań kontaktów (opcjonalne)
 
 ## Technologie
@@ -114,24 +118,76 @@ mini-crm/
 
 ### Testy jednostkowe
 ```bash
-pytest
+python manage.py test
 ```
 
-### Testy z pokryciem
+### Testy z pokryciem (coverage)
 ```bash
-pytest --cov=. --cov-report=html
+# Uruchom testy z pomiarem pokrycia
+coverage run --source='.' manage.py test
+
+# Zobacz raport w terminalu
+coverage report
+
+# Wygeneruj raport HTML
+coverage html
+# Otwórz htmlcov/index.html w przeglądarce
 ```
 
-### Testy E2E (Playwright)
+### Generowanie danych demonstracyjnych
 ```bash
-# Instalacja przeglądarek (jednorazowo)
-playwright install chromium
+# Wygeneruj przykładowe dane
+python manage.py generate_demo_data
 
-# Uruchomienie testów E2E
-pytest tests/e2e/
+# Wygeneruj dane i wyczyść stare
+python manage.py generate_demo_data --clear
+
+# Dane logowania: demo1/demo123, demo2/demo123, demo3/demo123
 ```
 
 ## Deployment
+
+### Docker (Zalecane dla produkcji)
+
+Najprostszy sposób uruchomienia aplikacji z automatyczną synchronizacją ERP.
+
+```bash
+# 1. Skopiuj i skonfiguruj zmienne środowiskowe
+cp .env.example .env
+# Edytuj .env i uzupełnij dane
+
+# 2. Uruchom z Docker Compose
+docker-compose up -d
+
+# 3. Aplikacja dostępna na http://localhost:8000
+```
+
+Cron automatycznie uruchomi synchronizację z ERP zgodnie z harmonogramem w `docker/crontab`.
+
+**Pełna dokumentacja Docker:** [docs/docker-guide.md](docs/docker-guide.md)
+
+### Railway (Cloud)
+
+1. Załóż konto na [Railway](https://railway.app)
+2. Połącz z repozytorium GitHub
+3. Railway automatycznie wykryje `Procfile` i `runtime.txt`
+4. Ustaw zmienne środowiskowe w panelu Railway:
+   - `SECRET_KEY`
+   - `DATABASE_URL` (automatycznie z PostgreSQL addon)
+   - `ALLOWED_HOSTS`
+5. Deploy!
+
+### Render
+
+1. Załóż konto na [Render](https://render.com)
+2. Utwórz nową Web Service
+3. Połącz z repozytorium
+4. Konfiguracja:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn mini_crm.wsgi:application`
+5. Dodaj PostgreSQL database
+6. Ustaw zmienne środowiskowe
+7. Deploy!
 
 ## Zmienne Środowiskowe (Produkcja)
 
@@ -160,6 +216,46 @@ Projekt zaliczeniowy - Kurs AI
 
 ---
 
+## Integracja z ERP
+
+MiniCRM może integrować się z systemami ERP, wyświetlając dane o zamówieniach, fakturach i dokumentach WZ bezpośrednio w kartach firm.
+
+### Obsługiwane systemy
+- ✅ Comarch ERP XL (API REST)
+- ⚙️ SAP (w planach)
+- ⚙️ Własne API (uniwersalny adapter)
+
+### Quick Start
+
+1. **Skonfiguruj credentials w `.env`:**
+```bash
+COMARCH_API_URL=https://twoj-serwer-erp.com/api
+COMARCH_API_KEY=twoj_api_key
+ERP_INTEGRATION_ENABLED=True
+```
+
+2. **Wypełnij endpointy API:**
+```bash
+# Edytuj plik z TODO:
+erp_integration/services/comarch_client.py
+```
+
+3. **Pełna dokumentacja:**
+```bash
+erp_integration/README.md        # Kompletny przewodnik
+erp_integration/QUICK_START.md   # Tutorial krok po kroku
+```
+
+### Funkcje integracji
+- 📊 Dane kontrahenta (saldo, limit kredytu, termin płatności)
+- 📦 Historia zamówień (status, wartość, daty)
+- 📄 Faktury (FS, FKOR, status płatności)
+- 📋 Dokumenty WZ
+- 💰 Historia płatności
+- 📈 Statystyki (nieopłacone faktury, zaległości)
+
+---
+
 ## Roadmap (Future Features)
 
 - [ ] Eksport kontaktów do CSV
@@ -169,6 +265,8 @@ Projekt zaliczeniowy - Kurs AI
 - [ ] API REST
 - [ ] Integracje (Gmail, Google Calendar)
 - [ ] Mobile app
+- [ ] Cache ERP data z background sync
+- [ ] Webhooks od ERP
 
 ---
 

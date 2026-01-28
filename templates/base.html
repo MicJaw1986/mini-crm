@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -15,7 +16,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% load static %}
 
     <!-- Navigation -->
     {% if user.is_authenticated %}
@@ -52,6 +52,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'tasks:task_list' %}">
                             <i class="bi bi-list-check"></i> Zadania
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'opportunities:opportunity_list' %}">
+                            <i class="bi bi-graph-up-arrow"></i> Opportunities
                         </a>
                     </li>
                 </ul>

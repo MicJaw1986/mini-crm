@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if action == 'create' %}
+        Nowa szansa sprzedaży
+    {% else %}
+        Edytuj szansę - {{ opportunity.name }}
+    {% endif %}
+    - MiniCRM
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'opportunities:opportunity_list' %}">Szanse sprzedaży</a>
+            </li>
+            {% if action == 'update' %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'opportunities:opportunity_detail' opportunity.pk %}">
+                    {{ opportunity.name }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Edycja</li>
+            {% else %}
+            <li class="breadcrumb-item active">Nowa szansa</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <h1 class="mb-4">
+        {% if action == 'create' %}
+            Nowa szansa sprzedaży
+        {% else %}
+            Edytuj: {{ opportunity.name }}
+        {% endif %}
+    </h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Podstawowe informacje -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Podstawowe informacje</h5>
+
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">
+                                    Nazwa szansy *
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                <div class="text-danger mt-1">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    Opis
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                <div class="text-danger mt-1">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Wartość i etap -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Wartość i etap</h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                        Wartość (PLN) *
+                                    </label>
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                    <div class="text-danger mt-1">{{ form.amount.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.probability.id_for_label }}" class="form-label">
+                                        Prawdopodobieństwo (%) *
+                                    </label>
+                                    {{ form.probability }}
+                                    {% if form.probability.errors %}
+                                    <div class="text-danger mt-1">{{ form.probability.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">0-100%</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.stage.id_for_label }}" class="form-label">
+                                    Etap *
+                                </label>
+                                {{ form.stage }}
+                                {% if form.stage.errors %}
+                                <div class="text-danger mt-1">{{ form.stage.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Daty -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Terminy</h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.expected_close_date.id_for_label }}" class="form-label">
+                                        Przewidywana data zamknięcia *
+                                    </label>
+                                    {{ form.expected_close_date }}
+                                    {% if form.expected_close_date.errors %}
+                                    <div class="text-danger mt-1">{{ form.expected_close_date.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.actual_close_date.id_for_label }}" class="form-label">
+                                        Rzeczywista data zamknięcia
+                                    </label>
+                                    {{ form.actual_close_date }}
+                                    {% if form.actual_close_date.errors %}
+                                    <div class="text-danger mt-1">{{ form.actual_close_date.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Wypełnij po zamknięciu (won/lost)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Relacje -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Powiązania</h5>
+
+                            <div class="mb-3">
+                                <label for="{{ form.contact.id_for_label }}" class="form-label">
+                                    Kontakt
+                                </label>
+                                {{ form.contact }}
+                                {% if form.contact.errors %}
+                                <div class="text-danger mt-1">{{ form.contact.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.company.id_for_label }}" class="form-label">
+                                    Firma
+                                </label>
+                                {{ form.company }}
+                                {% if form.company.errors %}
+                                <div class="text-danger mt-1">{{ form.company.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Przegrana (opcjonalnie) -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Informacje o przegranej (opcjonalnie)</h5>
+
+                            <div class="mb-3">
+                                <label for="{{ form.lost_reason.id_for_label }}" class="form-label">
+                                    Powód przegranej
+                                </label>
+                                {{ form.lost_reason }}
+                                {% if form.lost_reason.errors %}
+                                <div class="text-danger mt-1">{{ form.lost_reason.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Wypełnij jeśli stage = Przegrana</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.lost_reason_details.id_for_label }}" class="form-label">
+                                    Szczegóły przegranej
+                                </label>
+                                {{ form.lost_reason_details }}
+                                {% if form.lost_reason_details.errors %}
+                                <div class="text-danger mt-1">{{ form.lost_reason_details.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Przyciski -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                {% if action == 'create' %}
+                                    Utwórz szansę
+                                {% else %}
+                                    Zapisz zmiany
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'opportunities:opportunity_list' %}" class="btn btn-secondary">
+                                Anuluj
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pomoc (sidebar) -->
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5>Wskazówki</h5>
+
+                    <h6 class="mt-3">Etapy sprzedaży:</h6>
+                    <ul class="small">
+                        <li><strong>Kwalifikacja</strong> - sprawdzasz czy to prawdziwy lead</li>
+                        <li><strong>Propozycja</strong> - przygotowujesz ofertę</li>
+                        <li><strong>Negocjacje</strong> - ustalasz cenę/warunki</li>
+                        <li><strong>Wygrana</strong> - klient kupił!</li>
+                        <li><strong>Przegrana</strong> - klient zrezygnował</li>
+                    </ul>
+
+                    <h6 class="mt-3">Wartość ważona:</h6>
+                    <p class="small">
+                        Wartość × Prawdopodobieństwo = bardziej realistyczna prognoza przychodu
+                    </p>
+
+                    <h6 class="mt-3">Przykład:</h6>
+                    <ul class="small">
+                        <li>Deal 100,000 PLN × 50% = 50,000 PLN wartość ważona</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
