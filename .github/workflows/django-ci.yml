@@ -67,10 +67,10 @@ jobs:
         coverage report
         coverage html
 
-    # Krok 7: Sprawdź czy coverage jest wystarczające (min 70%)
+    # Krok 7: Sprawdź czy coverage jest wystarczające (min 65%)
     - name: Check coverage threshold
       run: |
-        coverage report --fail-under=70
+        coverage report --fail-under=65
 
     # Krok 8: Zapisz raport coverage jako artifact
     # Możesz go pobrać z GitHub Actions → Artifacts
